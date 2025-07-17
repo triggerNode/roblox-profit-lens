@@ -44,6 +44,114 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_products: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_limit: number | null
+          is_active: boolean | null
+          metadata: Json | null
+          name: string
+          price: number
+          product_id: string
+          stripe_price_id: string | null
+          trial_period_days: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_limit?: number | null
+          is_active?: boolean | null
+          metadata?: Json | null
+          name: string
+          price: number
+          product_id: string
+          stripe_price_id?: string | null
+          trial_period_days?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_limit?: number | null
+          is_active?: boolean | null
+          metadata?: Json | null
+          name?: string
+          price?: number
+          product_id?: string
+          stripe_price_id?: string | null
+          trial_period_days?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subscription_usage: {
+        Row: {
+          checkouts_count: number | null
+          id: string
+          last_updated: string
+          product_id: string
+        }
+        Insert: {
+          checkouts_count?: number | null
+          id?: string
+          last_updated?: string
+          product_id: string
+        }
+        Update: {
+          checkouts_count?: number | null
+          id?: string
+          last_updated?: string
+          product_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          product_id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          trial_end: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          product_id: string
+          status: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_end?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          product_id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_end?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           ad_spend: number | null

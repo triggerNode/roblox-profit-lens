@@ -81,9 +81,7 @@ serve(async (req) => {
     const periodEnd = subscription.current_period_end ? new Date(subscription.current_period_end) : null;
     const trialEnd = subscription.trial_end ? new Date(subscription.trial_end) : null;
     
-    // Handle lifetime subscriptions (no expiration date)
-    const isLifetime = subscription.product_id === "lifetime_pro";
-    const isActive = subscription.status === "active" && (isLifetime || (periodEnd && periodEnd > now));
+    const isActive = subscription.status === "active" && periodEnd && periodEnd > now;
     const isTrialing = subscription.status === "trialing" && trialEnd && trialEnd > now;
     const hasActiveSubscription = isActive || isTrialing;
 
@@ -92,7 +90,6 @@ serve(async (req) => {
       isActive,
       isTrialing,
       hasActiveSubscription,
-      isLifetime,
       periodEnd: periodEnd?.toISOString(),
       trialEnd: trialEnd?.toISOString()
     });

@@ -43,11 +43,31 @@ interface SubscriptionProviderProps {
 }
 
 export const SubscriptionProvider = ({ children }: SubscriptionProviderProps) => {
-  const { user, session } = useAuth();
+  const authContext = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [planFeatures, setPlanFeatures] = useState<PlanFeatures | null>(null);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Handle case where AuthProvider is still loading
+  if (!authContext) {
+    return (
+      <SubscriptionContext.Provider
+        value={{
+          subscription: null,
+          planFeatures: null,
+          hasActiveSubscription: false,
+          loading: true,
+          checkSubscription: async () => {},
+          openCustomerPortal: async () => { throw new Error('Auth not ready'); },
+        }}
+      >
+        {children}
+      </SubscriptionContext.Provider>
+    );
+  }
+
+  const { user, session } = authContext;
 
   const checkSubscription = async () => {
     if (!user || !session) {

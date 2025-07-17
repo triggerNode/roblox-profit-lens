@@ -14,7 +14,158 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          devex_rate: number | null
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          devex_rate?: number | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          devex_rate?: number | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          ad_spend: number | null
+          created_at: string
+          devex_rate: number
+          gross_robux: number
+          gross_usd: number
+          id: string
+          item_name: string
+          item_type: Database["public"]["Enums"]["item_type"]
+          marketplace_cut: number
+          net_robux: number
+          net_usd: number
+          source: string
+          transaction_date: string
+          upload_id: string | null
+          user_id: string
+        }
+        Insert: {
+          ad_spend?: number | null
+          created_at?: string
+          devex_rate: number
+          gross_robux: number
+          gross_usd?: number
+          id?: string
+          item_name: string
+          item_type: Database["public"]["Enums"]["item_type"]
+          marketplace_cut?: number
+          net_robux: number
+          net_usd?: number
+          source: string
+          transaction_date: string
+          upload_id?: string | null
+          user_id: string
+        }
+        Update: {
+          ad_spend?: number | null
+          created_at?: string
+          devex_rate?: number
+          gross_robux?: number
+          gross_usd?: number
+          id?: string
+          item_name?: string
+          item_type?: Database["public"]["Enums"]["item_type"]
+          marketplace_cut?: number
+          net_robux?: number
+          net_usd?: number
+          source?: string
+          transaction_date?: string
+          upload_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      uploads: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          filename: string
+          id: string
+          processing_status: string | null
+          total_transactions: number | null
+          upload_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          filename: string
+          id?: string
+          processing_status?: string | null
+          total_transactions?: number | null
+          upload_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          filename?: string
+          id?: string
+          processing_status?: string | null
+          total_transactions?: number | null
+          upload_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          ad_tracking: boolean | null
+          created_at: string
+          id: string
+          marketplace_cut: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ad_tracking?: boolean | null
+          created_at?: string
+          id?: string
+          marketplace_cut?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ad_tracking?: boolean | null
+          created_at?: string
+          id?: string
+          marketplace_cut?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +174,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      item_type: "GamePass" | "DevProduct" | "UGC" | "PremiumPayout" | "Other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +301,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      item_type: ["GamePass", "DevProduct", "UGC", "PremiumPayout", "Other"],
+    },
   },
 } as const

@@ -1,16 +1,26 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { Upload, FileText, TrendingUp, BarChart3, DollarSign } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Upload, FileText, TrendingUp, BarChart3, DollarSign, LogIn } from "lucide-react";
 import Papa from "papaparse";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user, session } = useAuth();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const handleUpload = useCallback(async (files: File[]) => {
     const file = files[0];
@@ -25,13 +35,24 @@ const Index = () => {
       return;
     }
 
+    // Check if user is authenticated
+    if (!user || !session) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to upload CSV files",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
+    }
+
     setIsUploading(true);
 
     try {
-      // Parse CSV to validate format
+      // Parse CSV to validate format and get data
       Papa.parse(file, {
         header: true,
-        complete: (results) => {
+        complete: async (results) => {
           const requiredColumns = ["Date", "Source", "Item", "Robux"];
           const columns = results.meta?.fields || [];
           
@@ -49,15 +70,48 @@ const Index = () => {
             return;
           }
 
-          // Since we don't have Supabase auth yet, show a message
-          toast({
-            title: "Authentication Required",
-            description: "Please connect to Supabase to enable file uploads and user authentication.",
-            variant: "destructive",
-          });
+          try {
+            // Call the edge function to process the CSV
+            const { data, error } = await supabase.functions.invoke('process-csv', {
+              body: {
+                csvData: results.data,
+                filename: file.name
+              }
+            });
+
+            if (error) {
+              console.error('Error processing CSV:', error);
+              toast({
+                title: "Processing Failed",
+                description: "Failed to process your CSV file. Please try again.",
+                variant: "destructive",
+              });
+              setIsUploading(false);
+              return;
+            }
+
+            if (data?.success) {
+              toast({
+                title: "Upload Successful",
+                description: `Processed ${data.processedCount} transactions successfully!`,
+              });
+              navigate("/dashboard");
+            } else {
+              toast({
+                title: "Processing Failed",
+                description: "There was an error processing your CSV file.",
+                variant: "destructive",
+              });
+            }
+          } catch (error) {
+            console.error('Error calling edge function:', error);
+            toast({
+              title: "Upload Failed",
+              description: "An error occurred while processing your file",
+              variant: "destructive",
+            });
+          }
           
-          // For now, redirect to signup page
-          navigate("/signup");
           setIsUploading(false);
         },
         error: (error) => {
@@ -77,7 +131,7 @@ const Index = () => {
       });
       setIsUploading(false);
     }
-  }, [toast, navigate]);
+  }, [toast, navigate, user, session]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: handleUpload,
@@ -90,6 +144,30 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-hero">
       <div className="container mx-auto px-4 py-16">
+        {/* Navigation */}
+        <div className="flex justify-end mb-8">
+          <div className="flex gap-4">
+            <Button 
+              variant="outline" 
+              asChild
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+            >
+              <Link to="/login">
+                <LogIn className="h-4 w-4 mr-2" />
+                Sign In
+              </Link>
+            </Button>
+            <Button 
+              variant="secondary" 
+              asChild
+            >
+              <Link to="/signup">
+                Get Started
+              </Link>
+            </Button>
+          </div>
+        </div>
+
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold mb-6 text-white">

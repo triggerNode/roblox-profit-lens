@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate, Link } from "react-router-dom";
 import { Upload, FileText, TrendingUp, BarChart3, DollarSign, LogIn } from "lucide-react";
 import Papa from "papaparse";
+import { SeatCounter } from "@/components/SeatCounter";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -176,6 +177,9 @@ const Index = () => {
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Drag your monthly sales CSV — we'll translate Robux into rent money.
           </p>
+          <div className="flex justify-center mb-6">
+            <SeatCounter className="text-white bg-white/20 hover:bg-white/30" />
+          </div>
         </div>
 
         {/* Upload Section */}

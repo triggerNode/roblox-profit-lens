@@ -24,13 +24,19 @@ interface Plan {
 }
 
 export const Pricing = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { toast } = useToast();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [seatData, setSeatData] = useState<any>(null);
 
   useEffect(() => {
     fetchPlans();
+    fetchSeatData();
+    
+    // Refresh seat data every 30 seconds
+    const interval = setInterval(fetchSeatData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchPlans = async () => {
@@ -50,16 +56,14 @@ export const Pricing = () => {
         .eq('product_id', 'early_bird')
         .single();
 
-      const earlyBirdCheckouts = usage?.checkouts_count || 0;
-      const earlyBirdLimit = products.find(p => p.product_id === 'early_bird')?.inventory_limit || 100;
-
       const formattedPlans: Plan[] = products.map(product => ({
         id: product.product_id,
         name: product.name,
         price: product.price,
         trial_period_days: product.trial_period_days,
         metadata: product.metadata,
-        available: product.product_id === 'early_bird' ? earlyBirdCheckouts < earlyBirdLimit : true,
+        available: product.product_id === 'early_bird' ? 
+          (seatData?.early_bird?.available ?? true) : true,
         popular: product.product_id === 'growth',
         features: generateFeatures((product.metadata as Record<string, any>) || {})
       }));
@@ -74,6 +78,16 @@ export const Pricing = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSeatData = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('seat-counter');
+      if (error) throw error;
+      setSeatData(data);
+    } catch (error) {
+      console.error('Error fetching seat data:', error);
     }
   };
 
@@ -122,17 +136,22 @@ export const Pricing = () => {
     }
 
     try {
-      // In a real implementation, you would create a checkout session
-      // For now, we'll show a placeholder
-      toast({
-        title: "Checkout",
-        description: "Stripe checkout integration would be implemented here",
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { product_id: planId },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
       });
+
+      if (error) throw error;
+
+      // Open Stripe checkout in a new tab
+      window.open(data.url, '_blank');
     } catch (error) {
       console.error('Checkout error:', error);
       toast({
         title: "Error",
-        description: "Failed to start checkout process",
+        description: error.message || "Failed to start checkout process",
         variant: "destructive",
       });
     }
@@ -167,6 +186,14 @@ export const Pricing = () => {
             {!plan.available && (
               <div className="absolute -top-3 right-4">
                 <Badge variant="destructive">Sold Out</Badge>
+              </div>
+            )}
+
+            {plan.id === 'early_bird' && seatData?.early_bird && (
+              <div className="absolute -top-3 left-4">
+                <Badge variant="secondary">
+                  {seatData.early_bird.remaining} / {seatData.early_bird.max} left
+                </Badge>
               </div>
             )}
 

@@ -1,5 +1,6 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { TrialBanner } from "@/components/TrialBanner";
 import { ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
@@ -89,7 +90,8 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               </DropdownMenu>
             </div>
           </header>
-          <main className="flex-1 overflow-auto">
+          <TrialBanner />
+          <main className="flex-1 overflow-auto p-6">
             {children}
           </main>
         </div>

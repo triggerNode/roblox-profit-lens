@@ -17,26 +17,23 @@ serve(async (req) => {
   }
 
   try {
-    logStep("Check subscription request started");
+    logStep("Subscription check started");
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
+    // Get user from auth header
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      throw new Error("No authorization header provided");
+      throw new Error("Authorization header required");
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
-    if (userError) {
-      throw new Error(`Authentication error: ${userError.message}`);
-    }
-
-    const user = userData.user;
-    if (!user) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
       throw new Error("User not authenticated");
     }
 
@@ -47,41 +44,65 @@ serve(async (req) => {
       .from("subscriptions")
       .select(`
         *,
-        subscription_products (
+        subscription_products!inner(
           name,
-          metadata,
-          inventory_limit
+          metadata
         )
       `)
       .eq("user_id", user.id)
-      .eq("status", "active")
-      .maybeSingle();
+      .in("status", ["active", "trialing"])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
 
-    if (subError) {
-      throw new Error(`Failed to fetch subscription: ${subError.message}`);
+    if (subError && subError.code !== "PGRST116") {
+      logStep("Database error", { error: subError });
+      throw new Error("Failed to fetch subscription");
     }
 
     if (!subscription) {
       logStep("No active subscription found");
-      return new Response(JSON.stringify({
-        hasActiveSubscription: false,
-        subscription: null,
-        planFeatures: null,
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          subscription: null,
+          planFeatures: null,
+          hasActiveSubscription: false,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        }
+      );
     }
 
-    const planFeatures = subscription.subscription_products?.metadata || {};
+    // Check if subscription is actually active (not expired)
+    const now = new Date();
+    const periodEnd = new Date(subscription.current_period_end);
+    const trialEnd = subscription.trial_end ? new Date(subscription.trial_end) : null;
     
-    logStep("Active subscription found", { 
-      productId: subscription.product_id,
+    const isActive = subscription.status === "active" && periodEnd > now;
+    const isTrialing = subscription.status === "trialing" && trialEnd && trialEnd > now;
+    const hasActiveSubscription = isActive || isTrialing;
+
+    logStep("Subscription status checked", { 
       status: subscription.status,
-      features: planFeatures
+      isActive,
+      isTrialing,
+      hasActiveSubscription,
+      periodEnd: periodEnd.toISOString(),
+      trialEnd: trialEnd?.toISOString()
     });
 
-    return new Response(JSON.stringify({
-      hasActiveSubscription: true,
+    // Get plan features from metadata
+    const planFeatures = subscription.subscription_products?.metadata || {};
+
+    // Calculate trial days remaining
+    let trialDaysRemaining = 0;
+    if (isTrialing && trialEnd) {
+      trialDaysRemaining = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    }
+
+    const responseData = {
       subscription: {
         id: subscription.id,
         product_id: subscription.product_id,
@@ -89,18 +110,31 @@ serve(async (req) => {
         current_period_end: subscription.current_period_end,
         trial_end: subscription.trial_end,
         cancel_at_period_end: subscription.cancel_at_period_end,
-        plan_name: subscription.subscription_products?.name,
+        plan_name: subscription.subscription_products?.name || "Unknown Plan",
+        trial_days_remaining: trialDaysRemaining,
       },
       planFeatures,
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+      hasActiveSubscription,
+    };
+
+    logStep("Returning subscription data", responseData);
+
+    return new Response(
+      JSON.stringify(responseData),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      }
+    );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      }
+    );
   }
 });

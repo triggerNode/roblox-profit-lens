@@ -10,6 +10,7 @@ interface Subscription {
   trial_end: string | null;
   cancel_at_period_end: boolean;
   plan_name: string;
+  trial_days_remaining: number;
 }
 
 interface PlanFeatures {
@@ -24,6 +25,7 @@ interface SubscriptionContextType {
   planFeatures: PlanFeatures | null;
   hasActiveSubscription: boolean;
   loading: boolean;
+  trialDaysRemaining: number;
   checkSubscription: () => Promise<void>;
   openCustomerPortal: () => Promise<void>;
 }
@@ -48,6 +50,7 @@ export const SubscriptionProvider = ({ children }: SubscriptionProviderProps) =>
   const [planFeatures, setPlanFeatures] = useState<PlanFeatures | null>(null);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [trialDaysRemaining, setTrialDaysRemaining] = useState(0);
 
   // Handle case where AuthProvider is still loading
   if (!authContext) {
@@ -58,6 +61,7 @@ export const SubscriptionProvider = ({ children }: SubscriptionProviderProps) =>
           planFeatures: null,
           hasActiveSubscription: false,
           loading: true,
+          trialDaysRemaining: 0,
           checkSubscription: async () => {},
           openCustomerPortal: async () => { throw new Error('Auth not ready'); },
         }}
@@ -90,11 +94,13 @@ export const SubscriptionProvider = ({ children }: SubscriptionProviderProps) =>
       setSubscription(data.subscription);
       setPlanFeatures(data.planFeatures);
       setHasActiveSubscription(data.hasActiveSubscription);
+      setTrialDaysRemaining(data.subscription?.trial_days_remaining || 0);
     } catch (error) {
       console.error('Error checking subscription:', error);
       setSubscription(null);
       setPlanFeatures(null);
       setHasActiveSubscription(false);
+      setTrialDaysRemaining(0);
     } finally {
       setLoading(false);
     }
@@ -140,6 +146,7 @@ export const SubscriptionProvider = ({ children }: SubscriptionProviderProps) =>
         planFeatures,
         hasActiveSubscription,
         loading,
+        trialDaysRemaining,
         checkSubscription,
         openCustomerPortal,
       }}

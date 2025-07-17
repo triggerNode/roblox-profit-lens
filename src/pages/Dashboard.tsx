@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, TrendingUp, Calculator, FileText, BarChart3, ArrowUp, ArrowDown } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Upload, TrendingUp, Calculator, FileText, BarChart3, ArrowUp, ArrowDown, Play } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -39,6 +39,7 @@ const Dashboard = () => {
   const [topItems, setTopItems] = useState<TopItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasData, setHasData] = useState(false);
+  const [isLoadingDemo, setIsLoadingDemo] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -141,6 +142,48 @@ const Dashboard = () => {
     navigate('/');
   };
 
+  const handleDemoData = useCallback(async () => {
+    setIsLoadingDemo(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('seed_demo');
+
+      if (error) {
+        console.error('Error creating demo data:', error);
+        toast({
+          title: "Demo Failed",
+          description: "Failed to create demo data. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.success) {
+        toast({
+          title: "Demo Data Created",
+          description: `Created ${data.transactionCount} sample transactions. Data expires in 24 hours.`,
+        });
+        // Refresh dashboard data
+        await fetchDashboardData();
+      } else {
+        toast({
+          title: "Demo Failed",
+          description: "Failed to create demo data. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error calling demo function:', error);
+      toast({
+        title: "Demo Failed",
+        description: "An error occurred while creating demo data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingDemo(false);
+    }
+  }, [toast, fetchDashboardData]);
+
   const getSelectedMetrics = () => {
     if (selectedMonth === "all") {
       return metrics.reduce((acc, m) => ({
@@ -211,10 +254,16 @@ const Dashboard = () => {
               <p className="text-muted-foreground mb-6">
                 Upload your first Roblox CSV file to see your profit dashboard
               </p>
-              <Button onClick={handleUploadClick}>
-                <Upload className="h-4 w-4 mr-2" />
-                Upload CSV File
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={handleUploadClick}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload CSV File
+                </Button>
+                <Button variant="outline" onClick={handleDemoData} disabled={isLoadingDemo}>
+                  <Play className="h-4 w-4 mr-2" />
+                  {isLoadingDemo ? "Loading..." : "Try Demo Data"}
+                </Button>
+              </div>
             </div>
           </div>
         </div>

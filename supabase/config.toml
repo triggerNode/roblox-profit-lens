@@ -1,5 +1,14 @@
 project_id = "cdisjzisxpsnwuycdjri"
 
+[functions.seed_demo]
+verify_jwt = true
+
+[functions.update_devex_rate]
+verify_jwt = false
+
+[functions.send_weekly_report]
+verify_jwt = false
+
 [functions.parse_csv]
 verify_jwt = true
 

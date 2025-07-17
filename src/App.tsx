@@ -7,12 +7,16 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import Support from "./pages/Support";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Cookies from "./pages/Cookies";
 import AuthLayout from "./components/AuthLayout";
 import NotFound from "./pages/NotFound";
 import { Pricing } from "./pages/Pricing";
 import { AuthProvider } from "./contexts/AuthContext";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import CookieConsent from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +32,9 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/signup" element={<AuthLayout type="signup" />} />
               <Route path="/login" element={<AuthLayout type="login" />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/cookies" element={<Cookies />} />
               <Route path="/pricing" element={
                 <ProtectedRoute>
                   <Pricing />
@@ -50,6 +57,7 @@ const App = () => (
               } />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <CookieConsent />
           </BrowserRouter>
         </TooltipProvider>
       </SubscriptionProvider>

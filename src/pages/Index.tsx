@@ -4,14 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, Link } from "react-router-dom";
-import { Upload, FileText, TrendingUp, BarChart3, DollarSign, LogIn } from "lucide-react";
+import { Upload, FileText, TrendingUp, BarChart3, DollarSign, LogIn, Play } from "lucide-react";
 import Papa from "papaparse";
 import { SeatCounter } from "@/components/SeatCounter";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoadingDemo, setIsLoadingDemo] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, session } = useAuth();
@@ -22,6 +24,58 @@ const Index = () => {
       navigate("/dashboard");
     }
   }, [user, navigate]);
+
+  const handleDemoData = useCallback(async () => {
+    // Check if user is authenticated
+    if (!user || !session) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to try demo data",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
+    }
+
+    setIsLoadingDemo(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('seed_demo');
+
+      if (error) {
+        console.error('Error creating demo data:', error);
+        toast({
+          title: "Demo Failed",
+          description: "Failed to create demo data. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.success) {
+        toast({
+          title: "Demo Data Created",
+          description: `Created ${data.transactionCount} sample transactions. Data expires in 24 hours.`,
+        });
+        navigate("/dashboard");
+      } else {
+        toast({
+          title: "Demo Failed",
+          description: "Failed to create demo data. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error calling demo function:', error);
+      toast({
+        title: "Demo Failed",
+        description: "An error occurred while creating demo data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingDemo(false);
+    }
+  }, [toast, navigate, user, session]);
 
   const handleUpload = useCallback(async (files: File[]) => {
     const file = files[0];
@@ -205,13 +259,24 @@ const Index = () => {
                     : "Drag and drop your CSV file here, or click to browse"
                   }
                 </p>
-                <Button 
-                  variant="secondary" 
-                  disabled={isUploading}
-                  className="bg-white/20 hover:bg-white/30 text-white border-white/30"
-                >
-                  {isUploading ? "Processing..." : "Choose File"}
-                </Button>
+                <div className="flex gap-3">
+                  <Button 
+                    variant="secondary" 
+                    disabled={isUploading}
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                  >
+                    {isUploading ? "Processing..." : "Choose File"}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleDemoData}
+                    disabled={isLoadingDemo}
+                    className="bg-white/10 hover:bg-white/20 text-white border-white/30"
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    {isLoadingDemo ? "Loading..." : "Try Demo Data"}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -249,6 +314,8 @@ const Index = () => {
             </CardContent>
           </Card>
         </div>
+
+        <Footer />
       </div>
     </div>
   );

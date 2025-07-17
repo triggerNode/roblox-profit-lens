@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      global_settings: {
+        Row: {
+          created_at: string
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -164,7 +188,9 @@ export type Database = {
         Row: {
           ad_spend: number | null
           created_at: string
+          demo_data: boolean | null
           devex_rate: number
+          expires_at: string | null
           gross_robux: number
           gross_usd: number
           id: string
@@ -181,7 +207,9 @@ export type Database = {
         Insert: {
           ad_spend?: number | null
           created_at?: string
+          demo_data?: boolean | null
           devex_rate: number
+          expires_at?: string | null
           gross_robux: number
           gross_usd?: number
           id?: string
@@ -198,7 +226,9 @@ export type Database = {
         Update: {
           ad_spend?: number | null
           created_at?: string
+          demo_data?: boolean | null
           devex_rate?: number
+          expires_at?: string | null
           gross_robux?: number
           gross_usd?: number
           id?: string
@@ -259,6 +289,8 @@ export type Database = {
         Row: {
           ad_tracking: boolean | null
           created_at: string
+          email_rate_changes: boolean | null
+          email_weekly_reports: boolean | null
           id: string
           marketplace_cut: number | null
           updated_at: string
@@ -267,6 +299,8 @@ export type Database = {
         Insert: {
           ad_tracking?: boolean | null
           created_at?: string
+          email_rate_changes?: boolean | null
+          email_weekly_reports?: boolean | null
           id?: string
           marketplace_cut?: number | null
           updated_at?: string
@@ -275,6 +309,8 @@ export type Database = {
         Update: {
           ad_tracking?: boolean | null
           created_at?: string
+          email_rate_changes?: boolean | null
+          email_weekly_reports?: boolean | null
           id?: string
           marketplace_cut?: number | null
           updated_at?: string

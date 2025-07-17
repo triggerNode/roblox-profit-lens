@@ -1,73 +1,149 @@
-# Welcome to your Lovable project
+# Roblox Profit Lens 📊
 
-## Project info
+**Advanced Revenue Analytics Dashboard for Roblox Developers**
 
-**URL**: https://lovable.dev/projects/7ab3d96b-4879-40cb-936b-6e4d3df63504
+Roblox Profit Lens is a professional SaaS tool that helps Roblox developers analyze their revenue data, track profits, and gain valuable insights into their game performance through powerful data visualization and analytics.
 
-## How can I edit this code?
+## 🚀 Features
 
-There are several ways of editing your application.
+- **CSV Data Upload**: Import your Roblox revenue data via CSV files
+- **Advanced Analytics**: Comprehensive charts and visualizations
+- **Profit Tracking**: Monitor your earnings and DevEx calculations
+- **Subscription Management**: Stripe-powered billing system
+- **Authentication**: Secure user accounts with Supabase
+- **Real-time Dashboard**: Live data insights and reporting
+- **Responsive Design**: Works perfectly on desktop and mobile
 
-**Use Lovable**
+## 🛠️ Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/7ab3d96b-4879-40cb-936b-6e4d3df63504) and start prompting.
+- **Frontend**: React 18 + TypeScript + Vite
+- **UI Components**: shadcn/ui + Tailwind CSS
+- **Backend**: Supabase (Database + Auth + Functions)
+- **Payment Processing**: Stripe
+- **Charts**: Recharts
+- **File Processing**: Papa Parse (CSV)
+- **Hosting**: Ready for Vercel/Netlify deployment
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🏗️ Local Development
 
-**Use your preferred IDE**
+### Prerequisites
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Node.js 18+ or Bun
+- Supabase account
+- Stripe account (for payments)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Setup
 
-Follow these steps:
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd roblox-profit-lens
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   bun install
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+3. **Environment Setup**
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Update `.env.local` with your actual Supabase credentials:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+4. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
+   
+   The app will be available at `http://localhost:8080`
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+## 🗄️ Database Setup
+
+The project uses Supabase with the following key tables:
+- `profiles` - User profiles and subscription data
+- `csv_data` - Uploaded revenue data
+- `subscriptions` - Stripe subscription management
+
+Migration files are located in `supabase/migrations/`.
+
+## 🔧 Supabase Functions
+
+The project includes several Edge Functions:
+- `check-subscription` - Validate user subscriptions
+- `create-checkout` - Handle Stripe checkout sessions
+- `parse_csv` - Process uploaded CSV files
+- `stripe-webhook` - Handle Stripe webhooks
+- `send_weekly_report` - Automated email reports
+
+## 🚀 Deployment
+
+### Frontend Deployment (Vercel/Netlify)
+
+1. **Build the project**
+   ```bash
+   npm run build
+   ```
+
+2. **Deploy to Vercel**
+   ```bash
+   npx vercel --prod
+   ```
+
+3. **Set environment variables** in your deployment platform:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+
+### Supabase Functions Deployment
+
+```bash
+supabase functions deploy --project-ref your-project-ref
 ```
 
-**Edit a file directly in GitHub**
+## 📱 Features Overview
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Authentication & Subscriptions
+- Email/password authentication
+- Stripe-powered subscriptions
+- Trial periods and seat counting
+- Customer portal for billing management
 
-**Use GitHub Codespaces**
+### Data Analysis
+- CSV upload with validation
+- Revenue trend analysis
+- Profit margin calculations
+- DevEx rate tracking
+- Export capabilities
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Dashboard
+- Interactive charts and graphs
+- Real-time data updates
+- Responsive data tables
+- Filter and search functionality
 
-## What technologies are used for this project?
+## 🔒 Security
 
-This project is built with:
+- Environment variables for sensitive data
+- Supabase Row Level Security (RLS)
+- JWT-based authentication
+- Stripe webhook signature validation
+- CORS protection
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📞 Support
 
-## How can I deploy this project?
+For technical support or feature requests, visit the Support page in the application or contact the development team.
 
-Simply open [Lovable](https://lovable.dev/projects/7ab3d96b-4879-40cb-936b-6e4d3df63504) and click on Share -> Publish.
+## 📄 License
 
-## Can I connect a custom domain to my Lovable project?
+This project is proprietary software. All rights reserved.
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+**Built with ❤️ for the Roblox developer community**

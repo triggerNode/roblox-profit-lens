@@ -1,3 +1,4 @@
+// GitHub sync trigger - updated at 2025-01-17
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";

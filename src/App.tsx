@@ -9,43 +9,46 @@ import Settings from "./pages/Settings";
 import Support from "./pages/Support";
 import AuthLayout from "./components/AuthLayout";
 import NotFound from "./pages/NotFound";
-import { AuthProvider } from "./contexts/AuthContext";
+import { Pricing } from "./pages/Pricing";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/signup" element={<AuthLayout type="signup" />} />
-            <Route path="/login" element={<AuthLayout type="login" />} />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/settings" element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            } />
-            <Route path="/support" element={
-              <ProtectedRoute>
-                <Support />
-              </ProtectedRoute>
-            } />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/signup" element={<AuthLayout type="signup" />} />
+          <Route path="/login" element={<AuthLayout type="login" />} />
+          <Route path="/pricing" element={
+            <ProtectedRoute>
+              <Pricing />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard" element={
+            <ProtectedRoute requiresSubscription>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute requiresSubscription>
+              <Settings />
+            </ProtectedRoute>
+          } />
+          <Route path="/support" element={
+            <ProtectedRoute requiresSubscription>
+              <Support />
+            </ProtectedRoute>
+          } />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 

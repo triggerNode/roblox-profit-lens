@@ -1,0 +1,130 @@
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { useAuth } from './AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Subscription {
+  id: string;
+  product_id: string;
+  status: string;
+  current_period_end: string;
+  trial_end: string | null;
+  cancel_at_period_end: boolean;
+  plan_name: string;
+}
+
+interface PlanFeatures {
+  max_games?: string | number;
+  retention_days?: number;
+  auto_sync?: string;
+  seats?: number;
+}
+
+interface SubscriptionContextType {
+  subscription: Subscription | null;
+  planFeatures: PlanFeatures | null;
+  hasActiveSubscription: boolean;
+  loading: boolean;
+  checkSubscription: () => Promise<void>;
+  openCustomerPortal: () => Promise<void>;
+}
+
+const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
+
+export const useSubscription = () => {
+  const context = useContext(SubscriptionContext);
+  if (context === undefined) {
+    throw new Error('useSubscription must be used within a SubscriptionProvider');
+  }
+  return context;
+};
+
+interface SubscriptionProviderProps {
+  children: ReactNode;
+}
+
+export const SubscriptionProvider = ({ children }: SubscriptionProviderProps) => {
+  const { user, session } = useAuth();
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [planFeatures, setPlanFeatures] = useState<PlanFeatures | null>(null);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const checkSubscription = async () => {
+    if (!user || !session) {
+      setSubscription(null);
+      setPlanFeatures(null);
+      setHasActiveSubscription(false);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      setSubscription(data.subscription);
+      setPlanFeatures(data.planFeatures);
+      setHasActiveSubscription(data.hasActiveSubscription);
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+      setSubscription(null);
+      setPlanFeatures(null);
+      setHasActiveSubscription(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openCustomerPortal = async () => {
+    if (!session) {
+      throw new Error('No active session');
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-customer-portal', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      window.open(data.url, '_blank');
+    } catch (error) {
+      console.error('Error opening customer portal:', error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    checkSubscription();
+  }, [user, session]);
+
+  // Refresh subscription status every 30 seconds
+  useEffect(() => {
+    if (user && session) {
+      const interval = setInterval(checkSubscription, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user, session]);
+
+  return (
+    <SubscriptionContext.Provider
+      value={{
+        subscription,
+        planFeatures,
+        hasActiveSubscription,
+        loading,
+        checkSubscription,
+        openCustomerPortal,
+      }}
+    >
+      {children}
+    </SubscriptionContext.Provider>
+  );
+};

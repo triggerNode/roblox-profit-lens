@@ -1,14 +1,18 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requiresSubscription?: boolean;
 }
 
-export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
+export const ProtectedRoute = ({ children, requiresSubscription = false }: ProtectedRouteProps) => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasActiveSubscription, loading: subscriptionLoading } = useSubscription();
+  const location = useLocation();
 
-  if (loading) {
+  if (authLoading || subscriptionLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -18,6 +22,10 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (requiresSubscription && !hasActiveSubscription && location.pathname !== '/pricing') {
+    return <Navigate to="/pricing" replace />;
   }
 
   return <>{children}</>;

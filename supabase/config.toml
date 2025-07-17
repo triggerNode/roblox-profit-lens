@@ -2,3 +2,12 @@ project_id = "cdisjzisxpsnwuycdjri"
 
 [functions.parse_csv]
 verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.create-customer-portal]
+verify_jwt = true
+
+[functions.check-subscription]
+verify_jwt = true

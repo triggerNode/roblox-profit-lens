@@ -44,18 +44,19 @@ serve(async (req) => {
       .from("subscriptions")
       .select(`
         *,
-        subscription_products!inner(
+        subscription_products!left(
           name,
-          metadata
+          metadata,
+          is_active
         )
       `)
       .eq("user_id", user.id)
       .in("status", ["active", "trialing"])
       .order("created_at", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
-    if (subError && subError.code !== "PGRST116") {
+    if (subError) {
       logStep("Database error", { error: subError });
       throw new Error("Failed to fetch subscription");
     }
@@ -77,10 +78,12 @@ serve(async (req) => {
 
     // Check if subscription is actually active (not expired)
     const now = new Date();
-    const periodEnd = new Date(subscription.current_period_end);
+    const periodEnd = subscription.current_period_end ? new Date(subscription.current_period_end) : null;
     const trialEnd = subscription.trial_end ? new Date(subscription.trial_end) : null;
     
-    const isActive = subscription.status === "active" && periodEnd > now;
+    // Handle lifetime subscriptions (no expiration date)
+    const isLifetime = subscription.product_id === "lifetime_pro";
+    const isActive = subscription.status === "active" && (isLifetime || (periodEnd && periodEnd > now));
     const isTrialing = subscription.status === "trialing" && trialEnd && trialEnd > now;
     const hasActiveSubscription = isActive || isTrialing;
 
@@ -89,7 +92,8 @@ serve(async (req) => {
       isActive,
       isTrialing,
       hasActiveSubscription,
-      periodEnd: periodEnd.toISOString(),
+      isLifetime,
+      periodEnd: periodEnd?.toISOString(),
       trialEnd: trialEnd?.toISOString()
     });
 

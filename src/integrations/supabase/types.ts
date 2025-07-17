@@ -150,7 +150,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_subscriptions_product_id"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_products"
+            referencedColumns: ["product_id"]
+          },
+        ]
       }
       transactions: {
         Row: {

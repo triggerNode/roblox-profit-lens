@@ -59,7 +59,7 @@ serve(async (req) => {
       .single();
 
     if (productError || !product) {
-      throw new Error(`Product not found: ${product_id}`);
+      throw new Error(`Product not available for checkout: ${product_id}`);
     }
 
     // Check if early_bird and if sold out

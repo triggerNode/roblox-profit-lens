@@ -51,11 +51,12 @@ serve(async (req) => {
     const maxSeats = earlyBirdProduct?.inventory_limit || 100;
     const remainingSeats = Math.max(0, maxSeats - currentSeats);
 
-    // Get all plan seat counts
+    // Get all plan seat counts (excluding lifetime plans)
     const { data: allSubs, error: allSubsError } = await supabase
       .from("subscriptions")
       .select("product_id")
-      .eq("status", "active");
+      .eq("status", "active")
+      .neq("product_id", "lifetime_pro");
 
     if (allSubsError) {
       throw new Error(`Failed to fetch all subscriptions: ${allSubsError.message}`);

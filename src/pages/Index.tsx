@@ -72,7 +72,7 @@ const Index = () => {
 
           try {
             // Call the edge function to process the CSV
-            const { data, error } = await supabase.functions.invoke('process-csv', {
+            const { data, error } = await supabase.functions.invoke('parse_csv', {
               body: {
                 csvData: results.data,
                 filename: file.name

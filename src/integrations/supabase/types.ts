@@ -168,7 +168,20 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      metrics: {
+        Row: {
+          ad_spend_robux: number | null
+          avg_devex_rate: number | null
+          gross_robux: number | null
+          month: string | null
+          net_robux: number | null
+          net_usd: number | null
+          roblox_cut_robux: number | null
+          total_transactions: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

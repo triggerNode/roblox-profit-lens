@@ -37,13 +37,13 @@ const CookieConsent = () => {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 animate-fade-in">
-      <Card className="bg-card border-border shadow-lg">
+      <Card className="bg-brand-dark100/90 backdrop-blur-lg border-white/20 shadow-lg">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <Cookie className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+            <Cookie className="h-5 w-5 text-brand-green mt-0.5 flex-shrink-0" />
             <div className="flex-1">
-              <h3 className="font-semibold mb-2">We use cookies</h3>
-              <p className="text-sm text-muted-foreground mb-3">
+              <h3 className="font-semibold mb-2 text-slate-50">We use cookies</h3>
+              <p className="text-sm text-slate-200 mb-3">
                 We use cookies to improve your experience and analyze site usage. 
                 By continuing, you agree to our use of cookies.
               </p>
@@ -57,7 +57,7 @@ const CookieConsent = () => {
               </div>
               <Link 
                 to="/cookies" 
-                className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                className="text-xs text-slate-300 hover:text-slate-50 transition-colors"
               >
                 Learn more about cookies
               </Link>

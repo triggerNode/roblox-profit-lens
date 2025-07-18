@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { SiteLayout } from '@/components/SiteLayout';
 
 interface PlanFeature {
   name: string;
@@ -166,17 +167,18 @@ export const Pricing = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
-        <p className="text-xl text-muted-foreground">
-          Select the perfect plan for your Roblox analytics needs
-        </p>
-      </div>
+    <SiteLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4 text-slate-50">Choose Your Plan</h1>
+          <p className="text-xl text-slate-200">
+            Select the perfect plan for your Roblox analytics needs
+          </p>
+        </div>
 
       <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
         {plans.map((plan) => (
-          <Card key={plan.id} className={`relative ${plan.popular ? 'border-primary shadow-lg' : ''}`}>
+          <Card key={plan.id} className={`relative bg-white/10 backdrop-blur-lg border-white/20 ${plan.popular ? 'border-primary shadow-lg' : ''}`}>
             {plan.popular && (
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-primary text-primary-foreground">Most Popular</Badge>
@@ -190,7 +192,7 @@ export const Pricing = () => {
             )}
 
             {plan.id === 'early_bird' && seatData?.early_bird && (
-              <div className="absolute -top-3 left-4">
+              <div className="absolute right-4 top-3">
                 <Badge variant="secondary">
                   {seatData.early_bird.remaining} / {seatData.early_bird.max} left
                 </Badge>
@@ -198,13 +200,13 @@ export const Pricing = () => {
             )}
 
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl">{plan.name}</CardTitle>
-              <div className="text-3xl font-bold">
+              <CardTitle className="text-2xl text-slate-50">{plan.name}</CardTitle>
+              <div className="text-3xl font-bold text-slate-50">
                 ${(plan.price / 100).toFixed(2)}
-                <span className="text-sm font-normal text-muted-foreground">/month</span>
+                <span className="text-sm font-normal text-slate-300">/month</span>
               </div>
               {plan.trial_period_days > 0 && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-slate-300">
                   {plan.trial_period_days} day free trial
                 </p>
               )}
@@ -215,17 +217,17 @@ export const Pricing = () => {
                 {plan.features.map((feature, index) => (
                   <div key={index} className="flex items-center gap-2">
                     {feature.included ? (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <CheckCircle className="h-4 w-4 text-brand-green" />
                     ) : (
                       <XCircle className="h-4 w-4 text-red-500" />
                     )}
-                    <span className="text-sm">{feature.name}</span>
+                    <span className="text-sm text-slate-200">{feature.name}</span>
                   </div>
                 ))}
               </div>
 
               <Button 
-                className="w-full" 
+                className={`w-full ${!plan.available ? 'cursor-not-allowed opacity-50' : ''}`}
                 onClick={() => handleCheckout(plan.id)}
                 disabled={!plan.available}
                 variant={plan.popular ? "default" : "outline"}
@@ -237,11 +239,12 @@ export const Pricing = () => {
         ))}
       </div>
 
-      <div className="text-center mt-12">
-        <p className="text-muted-foreground">
-          All plans include secure data handling and 24/7 support
-        </p>
+        <div className="text-center mt-12">
+          <p className="text-slate-300">
+            All plans include secure data handling and 24/7 support
+          </p>
+        </div>
       </div>
-    </div>
+    </SiteLayout>
   );
 };

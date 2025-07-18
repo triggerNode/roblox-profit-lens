@@ -34,7 +34,11 @@ export const ProtectedRoute = ({ children, requiresSubscription = false }: Prote
     return <Navigate to="/login" replace />;
   }
 
-  if (requiresSubscription && !hasActiveSubscription && location.pathname !== '/pricing') {
+  // Only require subscription for specific protected routes
+  const protectedRoutes = ['/dashboard', '/settings', '/support'];
+  const isProtectedRoute = protectedRoutes.includes(location.pathname);
+  
+  if (requiresSubscription && !hasActiveSubscription && isProtectedRoute) {
     return <Navigate to="/pricing" replace />;
   }
 

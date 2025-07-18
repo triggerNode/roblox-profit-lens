@@ -66,6 +66,12 @@ export default {
 					positive: 'hsl(var(--profit-positive))',
 					negative: 'hsl(var(--profit-negative))',
 					neutral: 'hsl(var(--profit-neutral))'
+				},
+				brand: {
+					blue1: 'hsl(var(--brand-blue1))',
+					blue2: 'hsl(var(--brand-blue2))',
+					green: 'hsl(var(--brand-green))',
+					dark100: 'hsl(var(--brand-dark100))'
 				}
 			},
 			backgroundImage: {
